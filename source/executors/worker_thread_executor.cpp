@@ -2,8 +2,10 @@
 #include "concurrencpp/executors/constants.h"
 
 namespace concurrencpp::details {
-    static thread_local worker_thread_executor* s_tl_this_worker = nullptr;
-}
+    namespace {
+        thread_local worker_thread_executor* s_tl_this_worker = nullptr;
+    }
+}  // namespace concurrencpp::details
 
 using concurrencpp::worker_thread_executor;
 
@@ -25,6 +27,9 @@ bool worker_thread_executor::drain_queue_impl() {
         }
 
         task();
+        if (details::s_tl_this_worker == nullptr) {
+            return false;
+        }
     }
 
     return true;
@@ -150,6 +155,11 @@ void worker_thread_executor::shutdown() {
     const auto abort = m_atomic_abort.exchange(true, std::memory_order_relaxed);
     if (abort) {
         return;  // shutdown had been called before.
+    }
+
+    if (details::s_tl_this_worker == this) {
+        m_thread.detach();
+        details::s_tl_this_worker = nullptr;
     }
 
     {
