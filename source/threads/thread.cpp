@@ -39,6 +39,10 @@ void thread::join() {
     m_thread.join();
 }
 
+void thread::detach() {
+    m_thread.detach();
+}
+
 size_t thread::hardware_concurrency() noexcept {
     const auto hc = std::thread::hardware_concurrency();
     return (hc != 0) ? hc : consts::k_default_number_of_cores;

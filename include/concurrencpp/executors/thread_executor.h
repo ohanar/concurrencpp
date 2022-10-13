@@ -17,7 +17,7 @@ namespace concurrencpp {
         std::mutex m_lock;
         std::list<details::thread> m_workers;
         std::condition_variable m_condition;
-        std::list<details::thread> m_last_retired;
+        details::thread m_last_retired;
         bool m_abort;
         std::atomic_bool m_atomic_abort;
 
